@@ -280,7 +280,7 @@ kubectl logs -p <pod-name> [-c <container-name>]
 ```
 
 
-## Kubernetes Namespaces
+## Kubernetes Namespaces (NS)
 Key areas to concentrate on include:
 
 - Default Namespaces in Kubernetes: Understand the predefined namespaces that come with a Kubernetes cluster and their specific purposes
@@ -289,9 +289,78 @@ Key areas to concentrate on include:
 - Namespaced vs Non-Namespaced Kubernetes Components: The distinction between namespaced and non-namespaced components in Kubernetes, such as the difference between pods (namespaced) and nodes (non-namespaced)
 - Kubernetes resources: How to list resources and how to check if a resource is namespaced or non-namespaced
 
-Namesapces explanation:
+Purposes:
+- isoltion
+- resource management - resource quatas (for a whole namespace)
+- resource management - resource limits (for each pod)
+- security (RBAC) - only allowed users have access to resources within the namespace
+- security (RBAC) - for the whole k8s cluster
+
+Different namespaces can have resources with the same names. It should be unique in scope of one namespace
+
+Namesapces (ns) explanation:
 `K8s cluster -> namespace -> pods -> resources`
 
 it's like
 
 `Town -> house -> room -> an object in the room`
+
+### Contexts
+🧩 A context is made up of 3 parts:
+| **Component** | **What it means**                         |
+| ------------- | ----------------------------------------- |
+| **Cluster**   | The Kubernetes API server to connect to   |
+| **User**      | The credentials (e.g. token, cert) to use |
+| **Namespace** | The default namespace for commands        |
+
+
+🛠 Example Context Configuration (~/.kube/config):
+```
+contexts:
+- name: dev-cluster
+  context:
+    cluster: dev
+    user: dev-user
+    namespace: development
+```
+In this context:
+
+- kubectl talks to the cluster named dev
+- Uses credentials from dev-user
+- Defaults to the development namespace
+
+✅ Common kubectl Context Commands
+| **Command**                                 | **What It Does**                    |
+| ------------------------------------------- | ----------------------------------- |
+| `kubectl config get-contexts`               | Lists all available contexts        |
+| `kubectl config current-context`            | Shows the current active context    |
+| `kubectl config use-context <context-name>` | Switches to a different context     |
+| `kubectl config set-context ...`            | Create or modify a context manually |
+| `kubectl config delete-context <name>`      | Deletes a context from config       |
+
+
+### 🛠  List cubectl commands and abreviations
+Includes if a resource is specific to a namespace or not.
+```
+kubectl get-resources | more
+```
+
+### Config View
+
+```
+kubectl config view
+kubectl config set-context --current --namespace={your default namespace}
+kubectl config view
+```
+
+### How to get all resoures in all namespaces
+```
+kubectl get all -A
+```
+
+
+## Kubernetes Deployments and ReplicaSets 
+- The relationship between Deployments and ReplicaSets
+- Default Deployment strategies
+- RollingUpdates and parameters
+- How to monitor the progress of a deployment rollout
