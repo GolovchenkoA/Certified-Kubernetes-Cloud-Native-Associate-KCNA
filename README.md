@@ -1,7 +1,7 @@
 # Certified-Kubernetes-Cloud-Native-Associate-KCNA
 
 [Kubernetes Cloud Native Associate KCNA Certification Course](https://www.udemy.com/course/dive-into-cloud-native-containers-kubernetes-and-the-kcna/)
-
+[Course GitHub link](https://github.com/spurin/diveintokcna)
 👉 All additional files are stored on Google Disc in the folder Certification `Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)`
 
 
@@ -138,3 +138,54 @@ For the KCNA examination, please pay attention to the following areas in the nex
 | **OPA/Gatekeeper** | Open Policy Agent            | **Policy as Code / Authorization**      | Kubernetes admission control |
 
 
+
+## Introduction to Containers
+- namespaces
+- [cgroups](https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v1/cgroups.html)
+
+
+
+### Container Networking Services and Volumes
+Challenge:
+
+Create and run 3 Nginx containers with different content using volumes. Each container should serve its own custom HTML page. Each container should be accessible on the localhost with it’s own unique port
+
+Solution:
+```
+% cd /tmp
+% mkdir website1 website2 website3
+
+% echo 1 > website1/index.html
+% echo 2 > website2/index.html
+
+
+% docker run -d --rm -p 12301:80 -v /tmp/website1:/usr/share/nginx/html nginx
+844b0ddbccd795d16d2bc78368c23114e095dfffe46c1ced97e5b10ef0ae69b8
+
+% docker run -d --rm -p 12302:80 -v /tmp/website2:/usr/share/nginx/html nginx
+ad7892ac554ae3b2a1f385f3e2a2f20e107832ab7235b7485a9552e04aac9ae0
+
+
+% curl http://localhost:12301
+% curl http://localhost:12302
+```
+
+## Kubernetes Fundamentals
+
+### Kubernetes Architecture
+For the KCNA Examination it is important to have a thorough understanding of the Kubernetes Architecture and the roles of specific components:
+
+- The role of the kubelet and how it interacts with the CRI (Container Runtime Interface)
+- The role of the kube-scheduler
+- The role of the kube-proxy
+- The role of the kubeapi-server
+- The role of etcd
+- Container Runtimes and the differences between high level and low level runtimes
+- The hierarchy of Kubernetes components - From Cluster to Node to Pod to Container
+- What is the CCM (Cloud Controller Manager) and where this would reside in a Kubernetes cluster
+
+### Install docker extensions
+The extension below can be opened in Docker Desktop on the `Extensions` tab. Login\password: root
+```
+docker extension install spurin/diveintokcna-lab-extension
+```
