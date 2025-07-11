@@ -115,3 +115,26 @@ For example: “This month’s uptime was 99.96%” → that's your SLI.
 | **SLO** | Service Level Objective | Operational goal | Internal             | ❌ No   | "99.95% uptime target"        |
 | **SLI** | Service Level Indicator | Measurement      | Internal             | ❌ No   | "Uptime last 30 days: 99.96%" |
 
+
+
+## Open Standards
+For the KCNA examination, please pay attention to the following areas in the next video -
+
+- Role of the Open Container Initiative (OCI)
+- The reference implementation of the OCI runtime specification
+- Different types of Open Standards, i.e. CNI, CRI, CSI
+
+### 📦 Key Open Standards in Cloud-Native Systems
+
+| **Acronym**        | **Full Name**                | **What It Standardizes**                | **Used By**                  |
+| ------------------ | ---------------------------- | --------------------------------------- | ---------------------------- |
+| **CNI**            | Container Network Interface  | **Networking** (IP assignment, routing) | Kubernetes, Nomad, OpenShift |
+| **CRI**            | Container Runtime Interface  | **Container runtime abstraction**       | Kubernetes                   |
+| **CSI**            | Container Storage Interface  | **Storage provisioning and mounting**   | Kubernetes, OpenShift, etc.  |
+| **OCI**            | Open Container Initiative    | **Image format & runtime**              | Docker, Podman, containerd   |
+| **SDS**            | Software-Defined Storage     | **Storage abstraction via software**    | Ceph, Rook                   |
+| **SCS**            | Secure Compute Specification | **Confidential computing standards**    | Intel TDX, AMD SEV, etc.     |
+| **SMI**            | Service Mesh Interface       | **standard API specification on kubernetes**    |     |
+| **OPA/Gatekeeper** | Open Policy Agent            | **Policy as Code / Authorization**      | Kubernetes admission control |
+
+
