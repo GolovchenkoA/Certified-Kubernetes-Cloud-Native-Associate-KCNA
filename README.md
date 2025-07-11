@@ -1,4 +1,4 @@
-# Certified-Kubernetes-Cloud-Native-Associate-KCNA
+# Certified Kubernetes Cloud Native Associate (KCNA)
 
 [Kubernetes Cloud Native Associate KCNA Certification Course](https://www.udemy.com/course/dive-into-cloud-native-containers-kubernetes-and-the-kcna/)
 [Course GitHub link](https://github.com/spurin/diveintokcna)
@@ -189,3 +189,109 @@ The extension below can be opened in Docker Desktop on the `Extensions` tab. Log
 ```
 docker extension install spurin/diveintokcna-lab-extension
 ```
+
+### Google Cloud Shell
+https://github.com/spurin/diveintokcna/tree/cloudshell
+
+### k3s Kubernetes Cluster
+k3s, a streamlined Kubernetes distribution, to minimise the system resource requirements. The implementation of k3s enables us to comprehensively address the entire curriculum necessary for the KCNA examination.
+
+
+### kubectl port forward
+`kubectl port-forward` is a command used to forward one or more local ports to a port on a pod in your Kubernetes cluster. It’s especially useful for debugging services or accessing internal pods without exposing them via LoadBalancer or Ingress.
+
+```
+kubectl port-forward pod/my-pod 8080:80 8443:443
+```
+
+### Dry run
+The `--dry-run` flag simulates a command. It validates your YAML or CLI input and shows the result, but does not apply any changes to the cluster.
+
+Examples
+✅ Validate a Deployment manifest:
+
+Checks if deployment.yaml is valid — but doesn’t apply it.
+```
+kubectl apply -f deployment.yaml --dry-run=client
+```
+✅ Generate YAML from command (preview):
+
+Outputs the YAML that would be created, but does not create anything.
+```
+kubectl create deployment myapp --image=nginx --dry-run=client -o yaml
+```
+
+### kubectl Explain 
+
+```
+kubectl explain pod.spec.restartPolicy
+
+[sudo] password for defaultuser:
+KIND:       Pod
+VERSION:    v1
+
+FIELD: restartPolicy <string>
+ENUM:
+    Always
+    Never
+    OnFailure
+
+DESCRIPTION:
+    Restart policy for all containers within the pod. One of Always, OnFailure,
+    Never. In some contexts, only a subset of those values may be permitted.
+    Default to Always. More info:
+    https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy
+
+    Possible enum values:
+     - `"Always"`
+     - `"Never"`
+     - `"OnFailure"`
+```
+
+### Imperative and Declarative commands
+
+Imperative commands like `kubectl create`, `kubectl update` provide explicit instructions to the cluster.
+
+Declarative commands like `kubectl apply` provides desired state of a resource\resources. Can be executed multiple times without errors.
+
+
+### Group Commands with {} — Execute Sequentially in the Same Shell
+All commands are executed sequentially. `{ command1; command2; command3; }`
+
+They run in the same shell (they can share variables).
+The entire group must be followed by a semicolon (;) or a newline before the closing }.
+
+🔸 Example:
+
+```
+{ echo "Starting..."; ls -l; echo "Done."; }
+```
+
+
+### Init containers vs Sidecar containers
+[Init containers vs Sidecar containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/)
+
+### Get logs for a crashed container
+The `-p` flag in kubectl logs stands for "previous". It allows you to view the logs of a container from its previous instance, before it was restarted.
+
+🧠 Full Command:
+```
+kubectl logs -p <pod-name> [-c <container-name>]
+```
+
+
+## Kubernetes Namespaces
+Key areas to concentrate on include:
+
+- Default Namespaces in Kubernetes: Understand the predefined namespaces that come with a Kubernetes cluster and their specific purposes
+- Kubernetes API Objects and Namespaces: Kubernetes API objects that can operate within namespaces. Specific focus should be given to ResourceQuotas and LimitRanges
+- Role-Based Access Control (RBAC) in Relation to Namespaces: The purpose of RBAC and the relationship with namespaces
+- Namespaced vs Non-Namespaced Kubernetes Components: The distinction between namespaced and non-namespaced components in Kubernetes, such as the difference between pods (namespaced) and nodes (non-namespaced)
+- Kubernetes resources: How to list resources and how to check if a resource is namespaced or non-namespaced
+
+Namesapces explanation:
+`K8s cluster -> namespace -> pods -> resources`
+
+it's like
+
+`Town -> house -> room -> an object in the room`
