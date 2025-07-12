@@ -5,10 +5,16 @@
 👉 All additional files are stored on Google Disc in the folder `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)`
 
 
-[Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/)
-[CNCF Landscape](https://landscape.cncf.io/) - list of CNCF applications.
-[Kubectl quick reference](https://kubernetes.io/docs/reference/kubectl/quick-reference/)
-[Kubectl All Commands](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
+### Links
+- [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/)
+
+- [CNCF Landscape](https://landscape.cncf.io/) - list of CNCF applications.
+
+- [Kubectl quick reference](https://kubernetes.io/docs/reference/kubectl/quick-reference/)
+
+- [Kubectl All Commands](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
+
+- !!!!!!!Kubernetes Playgrounds ([source](https://kubernetes.io/docs/tasks/administer-cluster/change-default-storage-class/)) : [Play with K8s](https://labs.play-with-k8s.com/), [CodeCloud](https://kodekloud.com/public-playgrounds),[Killercoda](https://killercoda.com/playgrounds/scenario/kubernetes)
 
 ## Cloud Native Architecture Fundamentals
 Characteristics of Cloud Native Applications
@@ -514,14 +520,10 @@ Also please pay attention to the type of secret, for example, Opaque (the defaul
 ### Kubernetes API - Study Tips
 
 The KCNA Examination focusses on the theory of the API and particular attention should be made for the following areas -
-
-How CRD's ([Custom Resource Definition](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)) can be used to extend the Kubernetes API
-
-How to list resource types in a cluster
-
-The use of --authorization-mode
-
-The main three stages a request will pass through on its journey via the API server
+- How CRD's ([Custom Resource Definition](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)) can be used to extend the Kubernetes API
+- How to list resource types in a cluster
+- The use of --authorization-mode
+- The main three stages a request will pass through on its journey via the API server
 
 [Kubernetes Authorization](https://kubernetes.io/docs/reference/access-authn-authz/authorization/) . See --authorization-mode
 
@@ -534,12 +536,348 @@ You can use the following modes:
 - --authorization-mode=AlwaysAllow (always allows requests; carries security risks)
 - --authorization-mode=AlwaysDeny (always denies requests)
 
-List API resources `kubectl api-resources | more`
+List API resources 
+```
+kubectl api-resources | more
+```
 
 ### Kubernetes API
+
 [Kubernetes API](https://kubernetes.io/docs/concepts/overview/kubernetes-api/), also has links to its OpenAPI specs
+
 
 We can get additional information how the API is called by providing verbosity levels `-v=XXX`, where XXX is a number
 ```
 kubectl run ngingx --image=nginx -v=9
 ```
+
+So we are allowed to use, for example CURL, to call the API directly. The API requires authentication. See `/root/.kube/config` config file in Linux.
+
+### Admission Control
+[A Guide to Kubernetes Admission Controllers](https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/) . Also shows how API call workflow.
+[Admission Control in Kubernetes](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
+
+⚠️In the video we touched on this briefly but given, that this is an area that typically arises in the KCNA exam, please pay particular attention to the following resource and how long a feature or behaviour functions for after deprecation is announced. https://kubernetes.io/docs/reference/using-api/deprecation-policy/#deprecating-a-feature-or-behavior
+”Rule #7: Deprecated behaviors must function for no less than 1 year after their announced deprecation.”
+
+
+### Kubernetes RBAC
+From a KCNA examination viewpoint, only a high level knowledge of RBAC is required, for example what is the role and purpose of RBAC and how would you implement granular control. You should also be aware of Service Accounts which are covered in the Further Study section.
+
+RBAC is typically deemed as one of the most challenging topics to learn in Kubernetes and it is a favourite with interviewees in most Kubernetes job interviews.
+
+A lot of content on RBAC is fragmented and doesn't cover the specifics or mechanics of how RBAC is actually working on a newly installed Cluster.
+
+This 3 part video series is an extensive look at RBAC from the ground up and by the end of it, you'll be able confidently use and support RBAC. You'll also gain knowledge of advanced usage with Service Accounts in the Further Study section.
+
+If your focus in the KCNA examination then use these videos and further study sections accordingly and where required, treat them as available resources for consumption later.
+
+[RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
+
+```
+kubectl config view (--raw optional)
+```
+
+⚠️ Kubernetes does not manage user groups and accounts it expect certificates that are created and authorized by cerificate authority !!!!!!!
+
+An issued certificate contains a group (`O=xxxx`) and user (`CN=xxx`) and it`s considered as user name and group.
+
+The output of the command has "USERS", "GROUPS" and "SERVICEACCOUNTS" columns
+
+⚠️In k8s users and groups are managed externaly and within k8s they are represented as strings.
+⚠️ServiceAccounts are k8s objects tied to a specific namespace. It's used to give an application that's running on a Pod required permissions to interact with k8s API
+```
+kubectl get clusterrolebinding --sort-by name -o wide | more
+
+```
+```
+kubectl create clusterrolebinding ...
+```
+
+
+### [Role and ClusterRole] (https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole)
+An RBAC Role or ClusterRole contains rules that represent a set of permissions. Permissions are purely additive (⚠️there are no "deny" rules). ⚠️Kubernetes object always has to be either namespaced or not namespaced
+- A Role always sets permissions within a particular namespace; when you create a Role, you have to specify the namespace it belongs in.
+- ClusterRole, by contrast, ⚠️is a ***non-namespaced*** resource. The resources have different names (Role and ClusterRole) because a Kubernetes object always has to be either namespaced or not namespaced; it can't be both.
+
++----------------------+
+
+|   ClusterRole        |
+
+|   Name: pod-reader   |
+
+|   Verbs: get, list,  |
+
+|   watch              |
+
+|   Resources: pods    |
+
++----------+-----------+
+
+           |
+           
+           | referenced by
+           
+           v
+           
++------------------------------+
+
+|     ClusterRoleBinding       |
+
+|  Name: read-pods-for-dev-team|
+
+|  ClusterRole: pod-reader     |
+
+|  Subject: Group: dev-team    |
+
++-----------+------------------+
+
+            |
+            
+            | grants access to
+            
+            v
+            
++--------------------------+
+
+|      Group: dev-team     |
+
+| (from auth provider like |
+
+|   OIDC, LDAP, etc.)      |
+
++-----------+--------------+
+
+            |
+            
+            v
+            
++---------------------------+
+
+| Access to:                |
+
+| - All Pods                |
+
+| - Across all namespaces   |
+
+| - With: get, list, watch  |
+
++---------------------------+
+
+
+
+
+
+
+describe ClusterRole
+  ```
+  $ kubectl describe ClusterRole/cluster-admin
+  
+  Name:         cluster-admin
+    Labels:       kubernetes.io/bootstrapping=rbac-defaults
+    Annotations:  rbac.authorization.kubernetes.io/autoupdate: true
+    PolicyRule:
+  Resources  Non-Resource URLs  Resource Names  Verbs
+  ---------  -----------------  --------------  -----
+  *.*        []                 []              [*]
+             [*]                []              [*]
+  ```
+
+🔹 1. Create the ClusterRole
+```
+kubectl create clusterrole pod-reader \
+  --verb=get,list,watch \
+  --resource=pods
+```
+📝 This creates a ClusterRole named pod-reader that allows:  get, list, watch on pods Across all namespaces
+
+🔸 2. Bind it to a group using ClusterRoleBinding
+```
+kubectl create clusterrolebinding read-pods-for-dev-team \
+  --clusterrole=pod-reader \
+  --group=dev-team
+```
+
+How to check your permissions
+```
+cubectl auth can-i '*' '*'
+yes
+cubectl auth can-i '*' '*' --as-group="pod-reader" --as="batman"
+yes
+```
+
+
+### Certificates and Certificate Signing Requests
+[How to create and sign a certificate for a user (CertificateSigningRequest)](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/)
+[Approve\Reject certificate request](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#approval-rejection)
+
+list certificate requests and their statuses
+```
+kubectl get certificatessigningrequest
+or
+kubectl get csr your_user_name
+```
+
+[KUBECONFIG Variable](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/#set-the-kubeconfig-environment-variable)
+
+Use specific config to call kubectl command:
+```
+KUBECONFG=youruser-configfile.config kubectl ........
+```
+
+[Gitlab kubeconfig creator wrapper](https://github.com/spurin/kubeconfig-creator). A handy tool to generate a config file.
+
+```
+./kubeconfig_creator.sh -u bob -g cluster-viewonly
+⚙️ Stage 1 - User - Configuring user keys and certificate signing requests
+
+✨ Creating key for user bob-clusterviewonly as bob-clusterviewonly.key - openssl genrsa -out bob-clusterviewonly.key 4096
+✨ Creating certificate signing request, configuration file for bob-clusterviewonly as bob-clusterviewonly.cnf, embedding CN=bob and O=cluster-viewonly
+✨ Creating certificate signing request as bob-clusterviewonly.csr - openssl req -config ./bob-clusterviewonly.cnf -new -key bob-clusterviewonly.key -nodes -out bob-clusterviewonly.csr
+✨ Creating certificate signing request, kubernetes yaml declaration as bob-clusterviewonly-csr.yaml
+
+⚙️ Stage 2 - Kubernetes - Applying Certificate Signing Requests
+
+✨ Applying kubernetes yaml declaration - kubectl apply -f bob-clusterviewonly-csr.yaml
+✨ Approving kubernetes csr request - kubectl certificate approve mycsr
+
+⚙️ Stage 3 - Information Capture - Capturing information from Kubernetes
+
+✨ Capturing variable CLUSTER_NAME - kubectl config view --minify -o jsonpath={.current-context}
+✨ Capturing variable CLIENT_CERTIFICATE_DATA - kubectl get csr mycsr -o jsonpath='{.status.certificate}'
+✨ Capturing variable CLIENT_KEY_DATA - cat bob-clusterviewonly.key | base64 | tr -d '\n'
+✨ Capturing variable CLUSTER_CA - kubectl config view --raw -o json | jq -r '.clusters[] | select(.name == "'default'") | .cluster."certificate-authority-data"'
+✨ Capturing variable CLUSTER_ENDPOINT - kubectl config view --raw -o json | jq -r '.clusters[] | select(.name == "'default'") | .cluster."server"'
+
+⚙️ Stage 4 - Kubeconfig - Creating a Kubeconfig file with captured information
+
+✨ Creating Kubeconfig as bob-clusterviewonly.config - Test with - KUBECONFIG=./bob-clusterviewonly.config kubectl
+
+⚙️ Stage 5 - Cleanup - Moving temporary files from current directory, cleanup Kubernetes CSR
+
+🗑️  Creating temporary files store - mkdir tmp-bob-clusterviewonly-20230613101447
+🗑️  Cleanup bob-clusterviewonly.key - mv bob-clusterviewonly.key tmp-bob-clusterviewonly-20230613101447
+🗑️  Cleanup bob-clusterviewonly.cnf - mv bob-clusterviewonly.cnf tmp-bob-clusterviewonly-20230613101447
+🗑️  Cleanup bob-clusterviewonly.csr - mv bob-clusterviewonly.csr tmp-bob-clusterviewonly-20230613101447
+🗑️  Cleanup bob-clusterviewonly-csr.yaml - mv bob-clusterviewonly-csr.yaml tmp-bob-clusterviewonly-20230613101447
+🗑️  Cleanup csr/mycsr - kubectl delete csr/mycsr
+```
+
+### RoleBinding vs ClusterRoleBinding
+⚠️ RoleBinding - namespace specific, ClusterRoleBinding is cluster-wide
+
+
+
+### Kubernetes RBAC (Service Accounts)
+In our video lesson we covered extensively, role based access control through the use of ClusterRoles, ClusterRoleBindings and the equivalent with Roles and RoleBindings.
+
+It is also worth being aware of ServiceAccounts and their relation to Pods and how these operate behind the scenes.
+
+Each Pod in Kubernetes is automatically associated with a Service Account. This association is key to determining the permissions and resources that the processes inside the Pod will have access to.
+
+⚠️If you don’t specify a Service Account for a Pod, it defaults to using the 'default' Service Account in the same namespace and the Pod will have limited access to the Kubernetes API from within the Pod. This adheres to the Kubernetes best practice principle of least privilege.
+
+From a KCNA examination viewpoint, it is important to be aware that by default, a Pod will be assigned the ‘default’ Service Account in that Namespace.
+
+In everyday operations, you would not need to make use of a custom Service Account unless you wished for the Pod in Kubernetes to be able to perform specific operations against the Kubernetes cluster from within the Pod. For example, a Pod being permitted to create another Pod/Deployment/Secret etc.
+
+To show a simple example of how this may function you can perform the following exercise that will demonstrate the use of Service Accounts.
+
+#### Kubernetes RBAC (Service Accounts) Trainings
+🔍⚠️  Traininsg with all the commands can be found on Google disk in `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)\Section5\92. Kubernetes RBAC - Further Study (Service Accounts)`
+
+
+### Kubernetes Scheduling and NodeName
+For the KCNA qualification, a basic knowledge and understanding of the role of the scheduler is required. Particular attention should be applied to the use of nodeName as well as nodeSelector and the mechanism of labels that the nodeSelector makes us of (nodeSelector is an addition covered in the Further Study addendum).
+
+[Kube-Scheduler Docs](https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/)
+
+There are 3 stages when the scheduler decide on what node a pod should be created:
+1. Filtering
+2. Scoring
+3. Binding
+
+There is a posibility to build your own custom scheduler if it's needed 
+
+⚠️ Full example of creating custom schedulers can be found on Google Disk 
+
+
+pod.spec has schedulerName option:
+```
+kubectl explain pod.spec | more
+```
+
+### nodeSelector
+```
+kubectl describe node/worker-1 | more
+
+Name:               worker-1
+Roles:              <none>
+Labels:             beta.kubernetes.io/arch=arm64
+                    beta.kubernetes.io/instance-type=k3s
+                    beta.kubernetes.io/os=linux
+                    kubernetes.io/arch=arm64
+                    kubernetes.io/hostname=worker-1
+                    kubernetes.io/os=linux
+                    node.kubernetes.io/instance-type=k3s
+```
+And then, you can use the nodeSelector option to select specific nodes through the use of labels -
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: worker-1
+  containers:
+  - image: nginx
+    name: nginx
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolic
+```
+
+
+### Kubernetes Storage
+🔍⚠️  Traininsg with all the commands can be found on Google disk in `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)\Section5\99. Kubernetes Storage)`
+🔎 [Kubernetes Storage Docs](https://kubernetes.io/docs/concepts/storage/)
+[Storag Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/)
+⚠️ Storage and Volume are not the same thing!!!!
+For the KCNA Examination, as well as having top level knowledge there is a heavy emphasis on the internals and specifics of the Kubernetes Storage subsystem. Please pay attention to the following areas -
+
+- What is Ephemeral Storage
+- What is [Persistent Storage](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+- What is [Dynamic Volume Provisioning](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/)
+- Examples of CNCF Graduated Storage Solution(s)
+- Retain Policies
+
+  Special [emptyDir](https://kubernetes.io/docs/concepts/storage/volumes/#emptydir) ephemeral folder. For a Pod that defines an emptyDir volume, the volume is created when the Pod is assigned to a node. As the name says, the emptyDir volume is initially empty. All containers in the Pod can read and write the same files in the emptyDir volume, though that volume can be mounted at the same or different paths in each container
+
+[Pods and persistent volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#using). ⚠️Persistent volume climes is namespace specific
+[Climes as Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#claims-as-volumes)
+[Reclaim policies](https://kubernetes.io/docs/concepts/storage/storage-classes/#reclaim-policy)
+
+### Ceph Storage
+You should also be aware of Ceph, an offering from RedHat that provides object, block and file storage in one solution.
+
+Given the commercial nature of Ceph's relationship with RedHat, it is sometimes used as a storage solution in the OpenShift distribution of Kubernetes. From a KCNA viewpoint you should be aware of the project and it being a unified object/block and file solution.
+
+If this project is of interest, see the following resources -
+
+https://www.redhat.com/en/technologies/storage/ceph
+
+https://docs.openshift.com/container-platform/3.11/install_config/storage_examples/ceph_example.html
+
+
+
+### Kubernetes StatefulSets - Study Tips
+🔍⚠️  Traininsg with all the commands can be found on Google disk in `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)\Section5\103. Kubernetes StatefulSets)`
+For the KCNA examination, please focus on the following areas -
+
+- The purpose of StatefulSets
+- The difference/similarities between StatefulSets and Deployments
+- The StatefulSet relation/dependency on Services for naming
