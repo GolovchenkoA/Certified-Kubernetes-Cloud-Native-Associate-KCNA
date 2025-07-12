@@ -2,11 +2,13 @@
 
 [Kubernetes Cloud Native Associate KCNA Certification Course](https://www.udemy.com/course/dive-into-cloud-native-containers-kubernetes-and-the-kcna/)
 [Course GitHub link](https://github.com/spurin/diveintokcna)
-👉 All additional files are stored on Google Disc in the folder Certification `Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)`
+👉 All additional files are stored on Google Disc in the folder `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)`
 
 
 [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/)
 [CNCF Landscape](https://landscape.cncf.io/) - list of CNCF applications.
+[Kubectl quick reference](https://kubernetes.io/docs/reference/kubectl/quick-reference/)
+[Kubectl All Commands](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
 
 ## Cloud Native Architecture Fundamentals
 Characteristics of Cloud Native Applications
@@ -364,3 +366,180 @@ kubectl get all -A
 - Default Deployment strategies
 - RollingUpdates and parameters
 - How to monitor the progress of a deployment rollout
+
+
+### Deployment
+Deployment (with dry-run)
+```
+$ sudo kubectl create deployment nginx --image=nginx --dry-run=client -o yaml
+[sudo] password for defaultuser:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        resources: {}
+status: {}
+```
+
+It  can be applied by
+```
+$ sudo kubectl create deployment nginx --image=nginx --dry-run=client -o yaml | tee nginx-deployment.yaml | kubectl apply -f -
+
+$ kubectl get deployment
+$ kubectl get replicaset
+```
+
+### Rollout history
+This command shows the revision history of a Kubernetes Deployment named nginx.
+```
+$ kubectl rollout history deployment/nginx
+
+REVISION  CHANGE-CAUSE
+1         <none>
+2         kubectl apply --record ...
+```
+
+
+🔍 Breakdown:
+kubectl: Command-line tool to interact with Kubernetes.
+
+- rollout: Subcommand for managing the rollout of a resource (like a deployment).
+- history: Shows past rollout revisions.
+- deployment/nginx: Specifies the type (deployment) and name (nginx) of the resource.
+
+🚀 Related Commands
+Check current rollout status `kubectl rollout status deployment/nginx`
+Undo to a previous revision `kubectl rollout undo deployment/nginx`
+Add or update a deployment annotation `kubectl annotate deployment my-deployment description="Production deployment"`
+Scale a Deployment to 5 Pods `kubectl scale deployment/nginx-deployment --replicas=5`
+Get deployment details in YAML format `kubectl get deployment/nginx -o yaml | more`
+Monitor deployment in real-time after applying changes `kubectl apply -f deployment-nginx.yaml && kubectl rollout status deployment/nginx`
+Replace image in deployment and monitor rollout `kubectl set image deployment/nginx nginx=nginx:alpine && kubectl rollout status deployment/nginx`
+Describe a deployment in detail `kubectl describe deployment/nginxollout undo deployment/nginx `
+Expose a resource as a new Kubernetes service. see [cubectl expose](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_expose/)
+
+🚀 For additional information see: [Kubectl quick reference](https://kubernetes.io/docs/reference/kubectl/quick-reference/) and [Kubectl All Commands](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
+
+
+### [Services](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types)
+As Kubernetes (K8s), I define five types of Services (⚠️ 4 main and 1 as an extention), each designed to expose your applications in different ways:
+
+1.[ClusterIP](https://kubernetes.io/docs/concepts/services-networking/service/#type-clusterip) (default)
+Exposes the Service internally within the cluster.
+🔹 Use case: Internal microservice communication.
+spec.type: ClusterIP
+
+2. NodePort
+Exposes the Service on a static port (30000–32767) on each node’s IP.
+🔹 Use case: Basic external access for development or testing.
+spec.type: NodePort
+
+3. [LoadBalancer](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer)
+Provisions an external load balancer (cloud provider specific) to expose the Service.
+🔹 Use case: Public-facing services in cloud environments.
+spec.type: LoadBalancer
+
+4. ExternalName
+Maps the Service to an external DNS name without proxying traffic.
+🔹 Use case: Integrating with external services via DNS.
+spec.type: ExternalName
+
+5. Headless Service (ClusterIP: None)
+⚠️ It's a special type of ClusterIP
+Creates a Service without a stable cluster IP, allowing direct access to individual Pods.
+🔹 Use case: Stateful apps needing DNS-based Pod discovery.
+spec.clusterIP: None
+
+
+### DNS in Kubernetes
+Kubernetes clusters run a built-in DNS service (usually CoreDNS) that provides automatic DNS resolution for Services and Pods.
+
+📘 Why `ping xxx.default.svc.cluster.local` works.
+So this fully qualified domain name (FQDN) maps to the ClusterIP of the Kubernetes Service named xxx in the default namespace.
+Also `/etc/resolv.conf` should contain `search default.svc.cluster.local`  suffix.
+
+Let’s break down xxx.default.svc.cluster.local:
+| Part            | Meaning                                             |
+| --------------- | --------------------------------------------------- |
+| `xxx`           | Name of the **Service**                             |
+| `default`       | Kubernetes **Namespace** (default if not specified) |
+| `svc`           | Indicates it's a **Service**, not a Pod             |
+| `cluster.local` | The cluster’s **DNS domain**                        |
+
+
+
+### Kubernetes Jobs
+For the KCNA examination it is important to have an understanding of both Jobs and CronJobs, please pay particular attention to the following in the next video -
+
+- A [Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/) vs a CronJob
+- Completions and Parallelism
+
+  ` kubectl explain job.spec` - Provides detailed information of the structure and fields of this resource
+
+### Kubernetes ConfigMaps
+[ConfigMaps](https://kubernetes.io/docs/concepts/configuration/configmap/)
+
+[Configure a Pod to Use a ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
+
+
+### Kubernetes Secrets
+For the KCNA examination it is important to understand that ⚠️ **secrets are not encrypted*!!!!*, they are encoded with base64.
+Also please pay attention to the type of secret, for example, Opaque (the default type used if a type is not specified).
+
+
+### Lables
+[Lables](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+
+
+## Kubernetes Deep Dive
+
+### Kubernetes API - Study Tips
+
+The KCNA Examination focusses on the theory of the API and particular attention should be made for the following areas -
+
+How CRD's ([Custom Resource Definition](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)) can be used to extend the Kubernetes API
+
+How to list resource types in a cluster
+
+The use of --authorization-mode
+
+The main three stages a request will pass through on its journey via the API server
+
+[Kubernetes Authorization](https://kubernetes.io/docs/reference/access-authn-authz/authorization/) . See --authorization-mode
+
+Command line authorization mode configuration 
+You can use the following modes:
+- --authorization-mode=ABAC (Attribute-based access control mode)
+- --authorization-mode=RBAC (Role-based access control mode)
+- --authorization-mode=Node (Node authorizer)
+- --authorization-mode=Webhook (Webhook authorization mode)
+- --authorization-mode=AlwaysAllow (always allows requests; carries security risks)
+- --authorization-mode=AlwaysDeny (always denies requests)
+
+List API resources `kubectl api-resources | more`
+
+### Kubernetes API
+[Kubernetes API](https://kubernetes.io/docs/concepts/overview/kubernetes-api/), also has links to its OpenAPI specs
+
+We can get additional information how the API is called by providing verbosity levels `-v=XXX`, where XXX is a number
+```
+kubectl run ngingx --image=nginx -v=9
+```
