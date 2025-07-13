@@ -213,7 +213,19 @@ Appears as a container to Kubernetes, but runs in a dedicated mini-VM
 
 ✅ Use case: Workloads requiring trusted execution or compliance-grade isolation
 
-🔧 3. runc (default OCI runtime for containerd & Docker)
+3. Kata Containers?
+Kata Containers are a container runtime that runs each container inside a lightweight virtual machine (VM), combining the speed of containers with the strong security isolation of VMs.
+
+They are OCI-compliant, meaning they can plug into Kubernetes via containerd or CRI-O using the standard RuntimeClass feature.
+
+🛡️ Why Use Kata Containers?
+- Security is the key benefit:
+- Containers get hardware-level isolation from the host (like a virtual machine).
+
+This significantly reduces the attack surface and prevents breakout from a compromised container to the host. Helps meet compliance requirements (e.g. PCI-DSS, HIPAA).
+
+
+🔧 4. runc (default OCI runtime for containerd & Docker)
 
 Standard, widely used. Minimal isolation beyond Linux namespaces and cgroups
 
