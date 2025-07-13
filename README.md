@@ -1395,16 +1395,5 @@ While Argo CD is an excellent GitOps tool that we've explored in our lesson, �
 🔍⚠️  Traininsg with all the commands can be found on Google disk in `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)\Section 9\Product Summary Cheat Sheet`
 
 
-
-## TODO Repeat
-- Read about Keda event-driven auto scaler tool
-- "Crossing the Chasm" concept in the CNCF
--  Oversight Committee (TOC)
--  SIG to TAG (techincal advisory group) renaming
--  Late Majority (Which group, according to the "Crossing the Chasm" model, is most susceptible to risk and will wait for market adoption to increase before utilizing a project themselves? (Section 02 - Community and Governance))
--  Container Runtime Interface (CRI)
-- What is the purpose of the Open Container Initiative's Distribution Specification? (Section 2 - Open Standards)
-
-
 ### Examp Quastions and Answers
 Can be found in the examp folder on Google Disc (file name: `_EXAM Answers`)
