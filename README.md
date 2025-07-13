@@ -768,7 +768,7 @@ KUBECONFG=youruser-configfile.config kubectl ........
 
 
 
-### Kubernetes RBAC (Service Accounts)
+## Kubernetes RBAC (Service Accounts)
 In our video lesson we covered extensively, role based access control through the use of ClusterRoles, ClusterRoleBindings and the equivalent with Roles and RoleBindings.
 
 It is also worth being aware of ServiceAccounts and their relation to Pods and how these operate behind the scenes.
@@ -787,7 +787,7 @@ To show a simple example of how this may function you can perform the following 
 🔍⚠️  Traininsg with all the commands can be found on Google disk in `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)\Section5\92. Kubernetes RBAC - Further Study (Service Accounts)`
 
 
-### Kubernetes Scheduling and NodeName
+## Kubernetes Scheduling and NodeName
 For the KCNA qualification, a basic knowledge and understanding of the role of the scheduler is required. Particular attention should be applied to the use of nodeName as well as nodeSelector and the mechanism of labels that the nodeSelector makes us of (nodeSelector is an addition covered in the Further Study addendum).
 
 [Kube-Scheduler Docs](https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/)
@@ -842,7 +842,7 @@ spec:
 ```
 
 
-### Kubernetes Storage
+## Kubernetes Storage
 🔍⚠️  Traininsg with all the commands can be found on Google disk in `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)\Section5\99. Kubernetes Storage)`
 🔎 [Kubernetes Storage Docs](https://kubernetes.io/docs/concepts/storage/)
 [Storag Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/)
@@ -881,3 +881,442 @@ For the KCNA examination, please focus on the following areas -
 - The purpose of StatefulSets
 - The difference/similarities between StatefulSets and Deployments
 - The StatefulSet relation/dependency on Services for naming
+
+### StatefulState, Update Strategy and partition
+[Update Strategies](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies) and [Partitioned Rolling Updates](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#partitions)
+
+📌 What is partition?
+The partition setting delays updates to lower-numbered Pods.
+
+You can think of it like this:
+
+A StatefulSet with replicas: 5 has Pods:
+myapp-0, myapp-1, myapp-2, myapp-3, myapp-4
+
+If partition: 3, then:
+
+myapp-4 and myapp-3 get updated
+
+myapp-2, myapp-1, and myapp-0 will NOT be updated
+
+✔️ This gives you fine-grained control over which Pods are updated during a rollout.
+
+
+## Kubernetes NetworkPolicies
+🔍⚠️  Traininsg with all the commands can be found on Google disk in `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)\Section5\105. Kubernetes NetworkPolicies)`
+For the KCNA Examination, you need to be aware of the role of Network Policies and that policies are cumulative. If you apply multiple NetworkPolicies to a set of pods, the policies are added together.
+
+The effective policy is the union of all the individual policies. This approach ensures that if any policy allows a particular type of traffic, that traffic is allowed.
+
+[Ingress and Egress Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation)
+
+[Network policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/) are implemented by the network plugin. To use network policies, you must be using a networking solution which supports NetworkPolicy. Creating a NetworkPolicy resource without a controller that implements it will have no effect
+⚠️ [Container Network Interface (CNI) plugin](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/)  is essential for the enforcement of NetworkPolicies in Kubernetes
+
+
+### Kubernetes Pod Disruption Budgets
+For the KCNA examination, a general understanding of Pod Disruption Budgets is required, specific on the implementation and use-cases should be considered as informational only in the following video.
+🔍⚠️  Traininsg with all the commands can be found on Google disk in `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)\Section5\Kubernetes Pod Disruption Budgets`
+
+
+⚠️Familiarise yourself with the kubectl drain command -
+```
+kubectl drain --help | more
+```
+
+Introduce a more disruptive scenario by draining worker-2 using the kubectl drain command. This simulates a scenario like node maintenance, where the node is taken offline, and observe the impact on pod availability -
+```
+kubectl drain worker-2 --delete-emptydir-data=true --ignore-daemonsets=true
+```
+
+Create a Pod Disruption Budget for the nginx deployment, ensuring that a minimum of 2 pods are always available
+```
+kubectl create pdb nginx --selector=app=nginx --min-available=2
+```
+
+
+### kubectl cordon vs drain
+The difference between kubectl drain and kubectl cordon, which are often used together but serve different purposes.
+
+🔹 kubectl cordon  What it does:
+- Marks a node as unschedulable.
+- Does NOT remove or evict existing Pods.
+- New Pods will NOT be scheduled on this node.
+
+```
+kubectl cordon <node-name>
+```
+🧠 Use when:
+- You want to prevent new Pods from being scheduled to the node (e.g., before maintenance).
+- But you are not yet ready to evict existing Pods.
+
+🔸 kubectl drain What it does:
+- Cordon the node (same as above), AND
+- Evicts (gracefully deletes) all non-daemonset, non-static Pods.
+- Respects PodDisruptionBudgets (PDBs).
+- Intended to safely prepare the node for shutdown or maintenance.
+
+```
+kubectl drain <node-name> --ignore-daemonsets
+```
+🧠 Use when:
+You want to empty a node in preparation for:
+
+- Node reboot
+- OS upgrade
+- Hardware maintenance
+- Scaling down
+
+You want to migrate workloads off the node
+
+| Feature                  | `kubectl cordon` | `kubectl drain`                           |
+| ------------------------ | ---------------- | ----------------------------------------- |
+| Makes node unschedulable | ✅ Yes            | ✅ Yes                                     |
+| Evicts existing Pods     | ❌ No             | ✅ Yes (except DaemonSets and static Pods) |
+| Honors PDBs              | ❌ Not needed     | ✅ Yes — may block if PDB violated         |
+| Use case                 | Pause scheduling | Maintenance, reboot, upgrade              |
+
+
+## Kubernetes Security
+🔍⚠️  Traininsg with all the commands can be found on Google disk in `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)\Section5\114. Kubernetes Security)`
+
+For the KCNA exam, the following considerations -
+
+- Awareness of Security Tools and their function including `Falco` and `Open Policy Agent`
+- Knowledge that `Kubescape` can be used for hardening to NSA and CISA standards
+- OpenID Connect and it's purpose, be aware that the exam may shorten this to OIDC
+- Legacy: Although Pod Security Policies are deprecated, this was previously a common question in the exam and you should be aware that Pod Security Policies manage Clusters and Namespaces at runtime
+- The 4C's of Cloud Native Security
+
+[Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: security-context-demo
+spec:
+  securityContext:        <----------------------
+    runAsUser: 1000
+    runAsGroup: 3000
+    fsGroup: 2000
+    supplementalGroups: [4000]
+  volumes:
+  - name: sec-ctx-vol
+    emptyDir: {}
+  containers:
+  - name: sec-ctx-demo
+    image: busybox:1.28
+    command: [ "sh", "-c", "sleep 1h" ]
+    volumeMounts:
+    - name: sec-ctx-vol
+      mountPath: /data/demo
+    securityContext:
+      allowPrivilegeEscalation: false  <----------------------
+```
+
+### Pod Security Policies 
+
+[Pod Security Policies](https://kubernetes.io/docs/concepts/security/pod-security-policy/) ⚠️ deprecated from k8s v1.21 and removed from v1.25 and repalced by [Admission Controllers ](https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/). Now k8s is following the module approach and tools like `Kyverno` and `Open Policy Agent` (see also https://kubescape.io/) can be used.
+
+[Kubernetes Authentication with OIDC (OpenID): Simplifying Identity](https://medium.com/@extio/kubernetes-authentication-with-oidc-simplifying-identity-management-c56ede8f2dec)
+
+#### Kyverno and Open Policy Agent (OPA) Gatekeeper
+Pod Admission Controllers is used to enforce policies on incomming pods, by updating and mutating configurations before they are created. Kyverno and Open Policy Agent (OPA) Gatekeeper provides the same 
+
+#### What Kubescape does:
+It is designed for vulnerability and misconfiguration scanning in Kubernetes clusters
+
+ #### What Falco Does:
+ 
+Falco monitors the behavior of containers, Pods, and nodes at runtime, and detects:
+
+- Abnormal activity (e.g., shell inside a container, unexpected file access)
+- Suspicious system calls
+- Policy violations
+- Potential attacks like:
+- Crypto mining
+- Privilege escalation
+- Sensitive file reads
+
+📦 How It Works with Kubernetes: Falco:
+
+- Integrates with the Linux kernel using eBPF or a kernel module
+- Watches system calls made by containers and processes
+- Has built-in Kubernetes-aware rules
+- Can send alerts to Slack, webhooks, Prometheus, or even trigger automated responses
+
+
+### 4C's of Cloud Native Security
+⚠️For awareness and also for the purposes of the KCNA exam, you should be aware of the 4C’s of Cloud Native Security, namely Cloud, Cluster, Container, Code.
+
+Each endpoint acts as a layer from the outside-in and is a security best practice in Cloud Native Computing.
+
+Each subsequent layer acts as a reinforcement for the layer within. For example, Code would benefit from the security implementations of Container, Cluster and Cloud respectively.
+
+
+### Helm and Helm Charts
+🔍⚠️  Traininsg with all the commands can be found on Google disk in `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)\Section5\117. Helm and Helm Charts)`
+
+[Helm quick start](https://helm.sh/docs/intro/quickstart/)
+
+
+### Service Meshes 
+- The purpose of Service Meshes
+- The main components, Proxy and Data Plane
+- Common open source offerings for Service Meshes
+- The role of the [SMI (Service Mesh Interface)](https://smi-spec.io/)
+
+[SMI (Service Mesh Interface)](https://smi-spec.io/) is a specification that covers the most common service mesh capabilities:
+
+- Traffic policy – apply policies like identity and transport encryption across services
+- Traffic telemetry – capture key metrics like error rate and latency between services
+- Traffic management – shift traffic between different services
+
+[Service Mesh Architecture](https://www.tigera.io/learn/guides/service-mesh/service-mesh-architecture/). 2 main components:
+- Data Plane
+- Control Plane
+
+
+## Telemetry and Observability
+
+🔍⚠️  Traininsg with all the commands can be found on Google disk in `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)\Section5\128. Prometheus and Grafana)`
+
+### Cloud Native Observability 
+
+- The 3 pillars of Cloud Native Observability
+- Where and why you would use each Pillar, i.e. `Logs`, `Metrics`, `Traces`
+- The different types of Metrics, i.e. Gauges, Counters, Meters, Histograms
+- The relation between `Alerting` and the `3 pillars` of Cloud Native Observability
+- ```kubectl top```
+- understanding of options such as OpenTracing/OpenTelemetry and that these operate at the Application layer
+
+**Cloud native observability** is the ability to understand what’s happening inside a complex, distributed cloud native environment — in real time — using:
+- data like logs
+- metrics
+- traces, and events.
+
+
+### Logging agents
+| Tool           | Primary Focus               | Data Types | Footprint   | Kubernetes Native       | Written In |
+| -------------- | --------------------------- | ---------- | ----------- | ----------------------- | ---------- |
+| **Fluentd**    | Log collection & processing | Logs       | Heavy       | Yes (via DaemonSet)     | Ruby       |
+| **Fluent Bit** | Lightweight log forwarder   | Logs       | Lightweight | Yes (DaemonSet/sidecar) | C          |
+
+
+#### Metric Types
+| Metric Type   | Can Decrease? | Stores Rate?       | Buckets? | Use Case                              |
+| ------------- | ------------- | ------------------ | -------- | ------------------------------------- |
+| **Counter**   | ❌ No          | ✅ Yes (via rate()) | ❌ No     | Requests, errors, job runs            |
+| **Gauge**     | ✅ Yes         | ❌ No               | ❌ No     | Memory, CPU, queue size               |
+| **Histogram** | ❌ No (sum)    | ✅ Yes              | ✅ Yes    | Latency, size, duration distributions |
+| **Summary**   | ❌ No          | ✅ Yes              | ❌ No     | Percentiles (client-side calc)        |
+
+📦 What Are Buckets and Bins (Histogram)?
+
+In data analysis and monitoring, buckets (or bins) are intervals that group values into ranges for aggregation or visualization.
+
+
+There is "Meters" metric type (as I uderstand it's the same as Histogram), but ChatGPT says it has different meaning in different systems and usually it's confusing :
+| Context               | What "Meter" Means                        | Real Metric Types          |
+| --------------------- | ----------------------------------------- | -------------------------- |
+| **OpenTelemetry**     | API to create instruments                 | Counter, Histogram, Gauge  |
+| **Micrometer (Java)** | Base class for all metric types           | Counter, Gauge, Timer      |
+| **Dropwizard**        | A specific metric that tracks event rates | Meter (rate), Timer, Gauge |
+| **Prometheus**        | Not used as a type                        | Counter, Gauge, Histogram  |
+
+
+### OpenTracing/OpenTelemetry
+[OpenTracing]( https://opentracing.io/) and [OpenTelemetry](https://opentelemetry.io/docs/migration/opentracing/)
+is an open-source project under the Cloud Native Computing Foundation (CNCF) that provides APIs and instrumentation for distributed tracing. It offers a consistent, expressive, vendor-neutral API  (like Jaeger or Zipkin). for distributed tracing, which is critical for understanding and monitoring the performance of microservices-based applications.
+
+
+### Grafana and metric storages
+Grafana supports integration with Prometheus\InfluxDB\Elasticsearch
+
+🔁 Comparing InfluxDB and Prometheus
+| Feature                  | **Prometheus**                            | **InfluxDB**                           |
+| ------------------------ | ----------------------------------------- | -------------------------------------- |
+| Type                     | Pull-based monitoring system              | General-purpose time-series database   |
+| Data collection          | Pull (scrapes targets)                    | Push or pull (via Telegraf, API, etc.) |
+| Query language           | PromQL                                    | InfluxQL or Flux                       |
+| Data retention           | Local retention, no long-term storage     | Configurable, supports long retention  |
+| Use case focus           | Monitoring & alerting (Kubernetes, infra) | Metrics, IoT, real-time analytics      |
+| Integration with Grafana | ✅ Yes                                     | ✅ Yes                                  |
+
+
+🎯 When is InfluxDB Used in This Stack?
+While Prometheus + Grafana is the standard for Kubernetes monitoring, InfluxDB is often used when:
+
+🔹 1. You need high-frequency or custom time series data
+- IoT data (sensors, weather, logs)
+- Financial market data
+- Industrial systems
+
+🔹 2. You already use Telegraf
+
+Telegraf is an agent from InfluxData that collects, processes, and pushes metrics to InfluxDB. It's super flexible and supports plugins for:
+
+- Docker
+- Kubernetes
+- System metrics
+- Databases (MySQL, Redis, etc.)
+
+🔹 3. You want push-based metric collection
+Prometheus is pull-based by design.
+InfluxDB supports push-based via API or Telegraf, which is better for edge cases or restricted networks.
+
+🧪 Use Case Example: Side-by-side
+| Use Case                               | Use Tool                                  |
+| -------------------------------------- | ----------------------------------------- |
+| Kubernetes pod metrics                 | Prometheus                                |
+| System metrics (host uptime, disk I/O) | Telegraf → InfluxDB                       |
+| IoT sensor data from edge devices      | InfluxDB                                  |
+| Long-term or hybrid retention          | InfluxDB (or Prometheus + remote storage) |
+| Alerting                               | Prometheus + Alertmanager                 |
+| Visualization                          | Grafana (for both)                        |
+
+
+### SLI (Service Level Indicators) vs Fitness Functions
+
+| Aspect      | SLI                                     | Fitness Function                                      |
+| ----------- | --------------------------------------- | ----------------------------------------------------- |
+| **Purpose** | Measure user-experience quality         | Evaluate overall system or configuration fitness      |
+| **Scope**   | Specific metric (latency, errors, etc.) | Composite or custom metric combining multiple factors |
+| **Context** | SRE, SLAs, SLOs                         | Optimization, automated decision-making               |
+| **Usage**   | Track and alert on service health       | Guide deployment, autoscaling, or experiments         |
+| **Nature**  | Direct measurable indicator             | Derived/evaluative score                              |
+
+
+### SLA
+Top 10 SLA metric names:
+- Availability / Uptime
+- Response Time / Latency
+- Error Rate
+- Throughput
+- Mean Time to Recovery (MTTR)
+- Data Durability
+- Support Response Time
+- Request Success Rate
+- Capacity / Scalability
+- Security Compliance
+
+
+### Cost Management 
+
+- Cloud Anomaly Detection
+- `KubeCost` as a tool for Cost Observability
+
+✅ Tools like FinOps platforms, cloud-native cost dashboards, or third-party aggregators (e.g., CloudHealth, Spot.io) help track and optimize costs across clouds.
+
+🌐 Why Use Multiple Cloud Providers?
+- Avoid Vendor Lock-In
+- Reduces dependency on a single provider’s ecosystem or pricing.
+- High Availability & Resilience
+- Improves fault tolerance by distributing workloads across clouds.
+- Best-of-Breed Services
+- Different providers offer strengths in AI, storage, networking, etc.
+- Regulatory or Geographic Requirements
+- Some workloads must run in specific regions or clouds due to compliance.
+- Cost Optimization
+-  Organizations can shift workloads to the most cost-effective cloud.
+
+
+
+### KubeCost
+
+💡 Top Features of Kubecost
+1. Real-Time Cost Monitoring Tracks cost of workloads by:
+
+- Namespace
+
+- Deployment
+
+- Pod
+
+- Label
+
+- Service
+
+- Helps teams understand where money is being spent in a cluster.
+
+2. Cost Allocation & Chargeback Enables accurate cost allocation across:
+
+- Teams
+
+- Projects
+
+- Environments (dev/test/prod)
+
+- Supports multi-tenant Kubernetes clusters.
+
+- Helps with internal chargeback/showback models.
+
+3. Savings Recommendations Identifies underused resources (CPU, memory, etc.)
+
+Suggests:
+
+- Rightsizing pods
+
+- Spot instance usage
+
+- Node scaling options
+
+- Helps reduce overprovisioning and lower cloud bills.
+
+4. Budget Alerts
+- Allows teams to set cost budgets and thresholds.
+
+- Sends alerts (Slack, email, etc.) when limits are approached or exceeded.
+
+5. Multi-Cluster Support
+- Supports aggregation of cost data across multiple clusters.
+
+- Centralized cost monitoring for large environments.
+
+6. Integrates with Cloud Billing APIs
+-  Connects to AWS, GCP, Azure billing APIs.
+
+- Provides accurate cloud-native cost data for:
+
+- EBS volumes
+
+- Load balancers
+
+- Network traffic
+
+- Cloud provider discounts (e.g., AWS Savings Plans)
+
+7. Custom Pricing Support
+- Supports custom pricing models:
+
+- Internal infrastructure (bare metal, on-prem K8s)
+
+- Enterprise pricing agreements
+
+- Useful for hybrid cloud or private cloud setups.
+
+8. Open Source and Enterprise Editions
+- Open Source: Core features for single-cluster cost visibility
+
+- Enterprise: Enhanced UI, governance, multi-cluster views, and integrations (e.g., SSO, cost policies)
+
+9. Integration with Prometheus & Grafana
+- Uses Prometheus metrics for resource tracking.
+
+- Easily integrates with Grafana dashboards and other monitoring tools.
+
+10. Network Cost Allocation
+- Breaks down egress and ingress traffic costs.
+
+- Helps identify high-cost services and external communication.
+
+  Summary Table
+  | Feature                    | Open Source | Enterprise |
+| -------------------------- | ----------- | ---------- |
+| Real-time cost tracking    | ✅           | ✅          |
+| Budget alerts              | ✅           | ✅          |
+| Multi-cluster aggregation  | ❌           | ✅          |
+| SSO / RBAC                 | ❌           | ✅          |
+| Cloud provider billing API | Limited     | ✅          |
+| Custom pricing             | ✅           | ✅          |
