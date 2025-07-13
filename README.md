@@ -1389,3 +1389,18 @@ Flux's use of the GitOps Toolkit is a significant aspect that sets it apart from
 These components provide a flexible and powerful way to implement GitOps, allowing for more granular control and customisation of the continuous delivery process.
 
 While Argo CD is an excellent GitOps tool that we've explored in our lesson, 🚀 understanding Flux and its use of the GitOps Toolkit can provide you with a more comprehensive view of the GitOps landscape. Both tools have their strengths, and knowing when to use one over the other can be crucial in certain deployment scenarios. For those interested in delving deeper into Flux, its documentation is a great starting point.
+
+
+### Section 9 Product Summary Cheat Sheet
+🔍⚠️  Traininsg with all the commands can be found on Google disk in `Certification Courses\Kubernetes\Certified Kubernetes Cloud Native Associate (KCNA)\Section 9\Product Summary Cheat Sheet`
+
+
+
+## TODO Repeat
+- Read about Keda event-driven auto scaler tool
+- "Crossing the Chasm" concept in the CNCF
+-  Oversight Committee (TOC)
+-  SIG to TAG (techincal advisory group) renaming
+-  Late Majority (Which group, according to the "Crossing the Chasm" model, is most susceptible to risk and will wait for market adoption to increase before utilizing a project themselves? (Section 02 - Community and Governance))
+-  Container Runtime Interface (CRI)
+- What is the purpose of the Open Container Initiative's Distribution Specification? (Section 2 - Open Standards)
