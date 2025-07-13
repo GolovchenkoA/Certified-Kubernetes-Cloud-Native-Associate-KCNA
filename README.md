@@ -192,6 +192,47 @@ For the KCNA Examination it is important to have a thorough understanding of the
 - The hierarchy of Kubernetes components - From Cluster to Node to Pod to Container
 - What is the CCM (Cloud Controller Manager) and where this would reside in a Kubernetes cluster
 
+
+### Secure container runtime implementations (CRI)
+
+As Kubernetes, I support multiple container runtime implementations, but when it comes to enhanced security, the most notable ones include:
+
+🔐 1. gVisor
+
+Developed by Google. Provides a user-space kernel that intercepts and handles syscalls. Isolates containers from the host kernel
+
+Trade-off: slower than native runtimes (like runc), but much more secure
+
+✅ Use case: Multi-tenant environments where you prioritize security over performance
+
+🛡️ 2. Kata Containers
+
+Lightweight virtual machines (VMs) that act like containers. Use hardware virtualization (via QEMU, Firecracker, etc.). Strong hardware-level isolation between containers and host
+
+Appears as a container to Kubernetes, but runs in a dedicated mini-VM
+
+✅ Use case: Workloads requiring trusted execution or compliance-grade isolation
+
+🔧 3. runc (default OCI runtime for containerd & Docker)
+
+Standard, widely used. Minimal isolation beyond Linux namespaces and cgroups
+
+Can be hardened with:
+- Seccomp (syscall filtering)
+- AppArmor / SELinux (access control)
+
+Read-only root FS, dropping Linux capabilities, etc.
+
+Summary:
+
+| Runtime  | Isolation Level       | Security Mechanism          | Overhead |
+| -------- | --------------------- | --------------------------- | -------- |
+| `gVisor` | High                  | User-space syscall handling | Medium   |
+| `Kata`   | Very high (VM-based)  | Hardware virtualization     | High     |
+| `runc`   | Standard (namespaces) | OS-level hardening          | Low      |
+
+
+
 ### Install docker extensions
 The extension below can be opened in Docker Desktop on the `Extensions` tab. Login\password: root
 ```
@@ -860,6 +901,58 @@ For the KCNA Examination, as well as having top level knowledge there is a heavy
 [Pods and persistent volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#using). ⚠️Persistent volume climes is namespace specific
 [Climes as Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#claims-as-volumes)
 [Reclaim policies](https://kubernetes.io/docs/concepts/storage/storage-classes/#reclaim-policy)
+
+✅ Steps to Add Persistent Storage to a Pod:
+1. Define a PersistentVolumeClaim (PVC)
+
+This is a request for storage — Kubernetes will bind it to a matching PersistentVolume (PV), or dynamically provision one via a StorageClass.
+
+# pvc.yaml
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mypvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: standard
+```
+Apply it:
+```
+kubectl apply -f pvc.yaml
+```
+2. Reference the PVC in a Pod Spec
+
+
+# pod.yaml
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-storage
+spec:
+  containers:
+  - name: myapp
+    image: busybox
+    command: ["sleep", "3600"]
+    volumeMounts:
+    - mountPath: "/data"
+      name: myvolume
+  volumes:
+  - name: myvolume
+    persistentVolumeClaim:
+      claimName: mypvc
+```
+Apply it:
+
+```
+kubectl apply -f pod.yaml
+```
+
 
 ### Ceph Storage
 You should also be aware of Ceph, an offering from RedHat that provides object, block and file storage in one solution.
