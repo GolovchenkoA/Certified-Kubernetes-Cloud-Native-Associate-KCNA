@@ -1404,3 +1404,7 @@ While Argo CD is an excellent GitOps tool that we've explored in our lesson, ðŸš
 -  Late Majority (Which group, according to the "Crossing the Chasm" model, is most susceptible to risk and will wait for market adoption to increase before utilizing a project themselves? (Section 02 - Community and Governance))
 -  Container Runtime Interface (CRI)
 - What is the purpose of the Open Container Initiative's Distribution Specification? (Section 2 - Open Standards)
+
+
+### Examp Quastions and Answers
+Can be found in the examp folder on Google Disc (file name: `_EXAM Answers`)
