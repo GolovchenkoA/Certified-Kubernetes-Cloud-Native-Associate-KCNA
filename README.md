@@ -501,30 +501,31 @@ Expose a resource as a new Kubernetes service. see [cubectl expose](https://kube
 ### [Services](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types)
 As Kubernetes (K8s), I define five types of Services (⚠️ 4 main and 1 as an extention), each designed to expose your applications in different ways:
 
- 1.[ClusterIP](https://kubernetes.io/docs/concepts/services-networking/service/#type-clusterip) (default) 
- Exposes the Service internally within the cluster.
-🔹 Use case: Internal microservice communication.
+
+1. [ClusterIP](https://kubernetes.io/docs/concepts/services-networking/service/#type-clusterip) (default)  
+Exposes the Service internally within the cluster.  
+Use case: Internal microservice communication.  
 spec.type: ClusterIP
 
-2. NodePort
-Exposes the Service on a static port (30000–32767) on each node’s IP.
-🔹 Use case: Basic external access for development or testing.
+2. NodePort  
+Exposes the Service on a static port (30000–32767) on each node’s IP.  
+Use case: Basic external access for development or testing.  
 spec.type: NodePort
 
-3. [LoadBalancer](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer)
-Provisions an external load balancer (cloud provider specific) to expose the Service.
-🔹 Use case: Public-facing services in cloud environments.
+3. [LoadBalancer](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer)  
+Provisions an external load balancer (cloud provider specific) to expose the Service.  
+Use case: Public-facing services in cloud environments.  
 spec.type: LoadBalancer
 
-4. ExternalName
-Maps the Service to an external DNS name without proxying traffic.
-🔹 Use case: Integrating with external services via DNS.
+4. ExternalName  
+Maps the Service to an external DNS name without proxying traffic.  
+Use case: Integrating with external services via DNS.  
 spec.type: ExternalName
 
-5. Headless Service (ClusterIP: None)
-⚠️ It's a special type of ClusterIP
-Creates a Service without a stable cluster IP, allowing direct access to individual Pods.
-🔹 Use case: Stateful apps needing DNS-based Pod discovery.
+5. Headless Service (ClusterIP: None)  
+⚠️ It's a special type of ClusterIP  
+Creates a Service without a stable cluster IP, allowing direct access to individual Pods.  
+Use case: Stateful apps needing DNS-based Pod discovery.  
 spec.clusterIP: None
 
 
