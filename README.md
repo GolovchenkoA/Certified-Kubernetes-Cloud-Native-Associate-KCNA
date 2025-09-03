@@ -501,8 +501,8 @@ Expose a resource as a new Kubernetes service. see [cubectl expose](https://kube
 ### [Services](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types)
 As Kubernetes (K8s), I define five types of Services (⚠️ 4 main and 1 as an extention), each designed to expose your applications in different ways:
 
-1.[ClusterIP](https://kubernetes.io/docs/concepts/services-networking/service/#type-clusterip) (default)
-Exposes the Service internally within the cluster.
+ 1.[ClusterIP](https://kubernetes.io/docs/concepts/services-networking/service/#type-clusterip) (default) 
+ Exposes the Service internally within the cluster.
 🔹 Use case: Internal microservice communication.
 spec.type: ClusterIP
 
